@@ -38,6 +38,13 @@ class YTDLProxy(web.View):
     async def process(self):
         url = None
         res = web.Response(status=500)
+        #check if the user agent contains the string "Quest"
+        #This is implemented to skip downloading the video if the user is not on a quest in the first place
+        if not "Quest" in self.request.headers.get("User-Agent"):
+            #get everything after the ?url=
+            url = self.request.query.get("url") or self.request.query.get("u")
+            res = web.Response(status=307, headers={"Location": url})
+            return res
         try:
             url = await resolveUrl(self.request.query)
             res = web.Response(status=307, headers={"Location": url})
